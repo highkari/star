@@ -2,7 +2,6 @@ package org.dream.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.dream.model.Player;
 
 import java.io.UnsupportedEncodingException;
 
@@ -15,9 +14,8 @@ public class ConsoleHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws UnsupportedEncodingException {
 
         System.out.println(msg);
-        Player.AddressBook.Builder a = Player.AddressBook.newBuilder();
-        a.addPeople(Player.Person.newBuilder());
         ctx.write(msg);
+        ctx.close();
     }
 
     @Override

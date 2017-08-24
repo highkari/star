@@ -8,10 +8,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import org.dream.handler.ConsoleHandler;
+import org.dream.handler.WebSocketServerHandler;
 
 /**
  * Created by Administrator on 2017/8/17.
@@ -28,9 +29,12 @@ public class NettyServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
-                        ChannelPipeline p = ch.pipeline();
-                        p.addLast(new StringDecoder());
-                        p.addLast(new ConsoleHandler());
+                        ChannelPipeline pipeline = ch.pipeline();
+                        pipeline.addLast(new HttpServerCodec());
+                        pipeline.addLast(new HttpObjectAggregator(64*1024));
+                        pipeline.addLast(new WebSocketServerHandler());
+                       /* pipeline.addLast(new StringDecoder());
+                        pipeline.addLast(new ConsoleHandler());*/
                     }
                 });
 
@@ -41,6 +45,8 @@ public class NettyServer {
             System.out.println("start server success, you can telnet 127.0.0.1 8082 to send massage for this server");
             // Wait until the connection is closed.
             ch.channel().closeFuture().sync();
+            boss.shutdownGracefully();
+            worker.shutdownGracefully();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
